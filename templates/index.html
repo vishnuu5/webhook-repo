@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GitHub Actions Feed</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        async function fetchActions() {
+            const res = await fetch('/api/actions');
+            const data = await res.json();
+            const container = document.getElementById('actions');
+            container.innerHTML = '';
+            data.forEach(item => {
+                let msg = '';
+                const ts = new Date(item.timestamp).toLocaleString('en-GB', { timeZone: 'UTC', hour12: true, day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' UTC';
+                if (item.action === "PUSH") {
+                    msg = `<b>${item.author}</b> pushed to <b>${item.to_branch}</b> on ${ts}`;
+                } else if (item.action === "PULL_REQUEST") {
+                    msg = `<b>${item.author}</b> submitted a pull request from <b>${item.from_branch}</b> to <b>${item.to_branch}</b> on ${ts}`;
+                } else if (item.action === "MERGE") {
+                    msg = `<b>${item.author}</b> merged branch <b>${item.from_branch}</b> to <b>${item.to_branch}</b> on ${ts}`;
+                }
+                container.innerHTML += `<div class="action">${msg}</div>`;
+            });
+        }
+        setInterval(fetchActions, 15000);
+        window.onload = fetchActions;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>GitHub Actions Feed</h2>
+        <div id="actions"></div>
+    </div>
+</body>
+</html>
